@@ -1,0 +1,41 @@
+version: "3"
+
+services:
+  nginx:
+    dns:
+      - 8.8.8.8
+      - 4.4.4.4
+    build:
+      context: ./images
+      dockerfile: nginx.Dockerfile
+    working_dir: /var/www/html
+    container_name: real_nginx
+    networks:
+      - andre
+    ports:
+      - "80:80"
+    volumes:
+      - ./source:/var/www/html
+      - ./logs/nginx_log:/var/log/nginx
+      - ./config/nginx/project1.conf:/etc/nginx/conf.d/project1.conf
+      - ./config/nginx/project2.conf:/etc/nginx/conf.d/project2.conf
+      - ./logs/php_fpm/php-fpm.log:/var/log/php-fpm.log
+    links:
+      - mysql
+
+  mysql:
+    build:
+      context: ./images
+      dockerfile: mysql.Dockerfile
+    container_name: real_mysql
+    networks:
+      - andre
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./db/mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 123123
+networks:
+  andre:
+    driver: bridge
